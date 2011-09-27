@@ -12,9 +12,19 @@
 # ycsh library config
 #
 # Export symbols
-#	Index	Name		Type
-#	1		YC_CONFIG	readonly variable
-#
+#	Index	Name				Type		Description
+#	1		RTN_SUCC			Integer		return success
+#	2		RTN_FAIL			Integer		return failed
+#	3		RTN_ERR				Integer		return error(equal to failed)
+#	4		EXIT_SUCC			Integer
+#	5		EXIT_FAIL			Integer
+#	6		EXIT_ERR			Integer
+#	7		STDIN				Integer		Stdandard input
+#	8		STDOUT				Integer		Stdandard output
+#	9		STDERR				Integer		Stdandard error
+#	10		STDDEBUG			Integer		Stdandard debug
+#	11		YCSH_PATH_INSTALL	String		Default is /usr/local/bin/ycsh
+#	12		YCSH_PATH_LIB		String		Default is $YCSH_PATH_INSTALL/lib
 
 [ "$_54058677af28b5f4ca0752bde5e86b48" = "54058677af28b5f4ca0752bde5e86b48" ] && return 0
 _54058677af28b5f4ca0752bde5e86b48=54058677af28b5f4ca0752bde5e86b48
@@ -27,6 +37,7 @@ _54058677af28b5f4ca0752bde5e86b48=54058677af28b5f4ca0752bde5e86b48
 : ${YCSH_SUCC:=0}
 : ${YCSH_FAIL:=1}
 
+# input/output file descriptors
 : ${YCSH_STDIN:=0}
 : ${YCSH_STDOUT:=1}
 : ${YCSH_STDERR:=2}
