@@ -11,7 +11,7 @@
 #
 # ycsh library config
 #
-# Export symbols
+# Export Symbols
 #	Index	Name				Type		Description
 #	1		RTN_SUCC			Integer		return success
 #	2		RTN_FAIL			Integer		return failed
@@ -53,6 +53,7 @@ if ! type declare >/dev/null 2>&1 || type local >/dev/null 2>&1; then
 
 		for __tmp_loop_arg in "$@"
 		do
+			[ -n "${__tmp_loop_arg##*=*}" ] && __tmp_loop_arg="$__tmp_loop_arg=\"\""
 			$__tmp_callback "$__tmp_loop_arg"
 		done
 
@@ -92,24 +93,6 @@ if ! type local >/dev/null 2>&1; then
 fi
 
 # set to readonly
-lib_config_declare_attr()
-{
-	local arg opt opts=""
-
-	for opt in "$@"
-	do
-		[ -n "${arg##-*}" ] && break
-		shift
-		[ "--" = "$arg" ] && break
-		opts="$opts $opt"
-	done
-
-	echo "declare $opts $@"
-}
-
-eval $(lib_config_declare_attr -r YCSH_PATH_INSTALL=$YCSH_PATH_INSTALL YCSH_PATH_LIB=$YCSH_PATH_LIB)
-eval $(lib_config_declare_attr -r -i RTN_SUCC=$YCSH_SUCC EXIT_SUCC=$YCSH_SUCC RTN_FAIL=$YCSH_FAIL EXIT_FAIL=$YCSH_FAIL RTN_ERR=$YCSH_FAIL EXIT_ERR=$YCSH_FAIL)
-eval $(lib_config_declare_attr -r -i STDIN=$YCSH_STDIN STDOUT=$YCSH_STDOUT STDERR=$YCSH_STDERR STDDEBUG=$YCSH_STDDEBUG)
-
-# unset internal function
-unset -f lib_config_declare_attr
+declare -r  YCSH_PATH_INSTALL=$YCSH_PATH_INSTALL YCSH_PATH_LIB=$YCSH_PATH_LIB
+declare -r -i RTN_SUCC=$YCSH_SUCC EXIT_SUCC=$YCSH_SUCC RTN_FAIL=$YCSH_FAIL EXIT_FAIL=$YCSH_FAIL RTN_ERR=$YCSH_FAIL EXIT_ERR=$YCSH_FAIL
+declare -r -i STDIN=$YCSH_STDIN STDOUT=$YCSH_STDOUT STDERR=$YCSH_STDERR STDDEBUG=$YCSH_STDDEBUG
