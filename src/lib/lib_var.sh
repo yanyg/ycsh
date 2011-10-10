@@ -41,20 +41,20 @@ __yc_var_loop()
 # arg is grammer-valid variable name or not
 yc_var_isname()
 {
-	__yc_isvarname() { [ -n "${1##[0-9]*}" -a -n "${1##*[!A-Za-z0-9_]*}" ]; }
-	__yc_var_loop __yc_isvarname "$@"
+	__yc_var_isname() { [ -n "${1##[0-9]*}" -a -n "${1##*[!A-Za-z0-9_]*}" ]; }
+	__yc_var_loop __yc_var_isname "$@"
 }
 
 yc_var_isdeclared()
 {
-	__yc_isdeclared()
+	__yc_var_isdeclared()
 	{
-		yc_isvarname "$1" && {
+		yc_var_isname "$1" && {
 			[ -n "$(eval echo "\$$1")" ] || [ -z "$(eval echo "\${$1-s}")" ]
 		}
 	}
 
-	__yc_var_loop __yc_isdeclared "$@"
+	__yc_var_loop __yc_var_isdeclared "$@"
 }
 
 yc_var_gen()
