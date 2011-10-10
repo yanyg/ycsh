@@ -39,13 +39,13 @@ __yc_var_loop()
 }
 
 # arg is grammer-valid variable name or not
-yc_isvarname()
+yc_var_isname()
 {
 	__yc_isvarname() { [ -n "${1##[0-9]*}" -a -n "${1##*[!A-Za-z0-9_]*}" ]; }
 	__yc_var_loop __yc_isvarname "$@"
 }
 
-yc_isdeclared()
+yc_var_isdeclared()
 {
 	__yc_isdeclared()
 	{
@@ -57,13 +57,14 @@ yc_isdeclared()
 	__yc_var_loop __yc_isdeclared "$@"
 }
 
-yc_genvar()
+yc_var_gen()
 {
 	__yc_genvar()
 	{
 		local name=${1%%=*} value=${1##*=}
 
 		[ -n "$name" ] || return $RTN_FAIL
+		[ "$name" = "$value" ] && value=""
 	
 		name=$(echo -n "$name" |tr "[:cntrl:][:punct:][:space:]" "_")
 		[ -z "${name##[0-9]*}" ] && name="_$var"
@@ -73,5 +74,6 @@ yc_genvar()
 	}
 
 	local var_report=$(__yc_var_loop __yc_genvar "$@")
+
 	echo "${var_report% }"
 }

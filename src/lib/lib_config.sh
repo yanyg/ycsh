@@ -47,7 +47,7 @@ _54058677af28b5f4ca0752bde5e86b48=54058677af28b5f4ca0752bde5e86b48
 : ${YCSH_EBASE:=10}
 
 if ! type declare >/dev/null 2>&1 || type local >/dev/null 2>&1; then
-	lib_config_callback_loop()
+	__yc_config_callback_loop()
 	{
 		# support local or not ? we cannot assume it.
 		[ $# -lt 2 ] && return
@@ -63,7 +63,7 @@ if ! type declare >/dev/null 2>&1 || type local >/dev/null 2>&1; then
 		unset -v __tmp_callback __tmp_loop_arg
 	}
 
-	lib_config_callback_loop_opts()
+	__yc_config_callback_loop_opts()
 	{
 		[ $# -lt 2 ] && return
 		__tmp_callback=$1; shift
@@ -73,7 +73,7 @@ if ! type declare >/dev/null 2>&1 || type local >/dev/null 2>&1; then
 			shift
 		done
 
-		lib_config_callback_loop $__tmp_callback "$@"
+		__yc_config_callback_loop $__tmp_callback "$@"
 
 		unset -v __tmp_callback
 	}
@@ -84,14 +84,14 @@ if ! type declare >/dev/null 2>&1; then
 	declare()
 	{
 		# may cannot support local too.
-		lib_config_callback_loop_opts eval "$@"
+		__yc_config_callback_loop_opts eval "$@"
 	}
 fi
 if ! type local >/dev/null 2>&1; then
 	local()
 	{
 		# may cannot support local too.
-		lib_config_callback_loop_opts eval "$@"
+		__yc_config_callback_loop_opts eval "$@"
 	}
 fi
 
@@ -100,28 +100,32 @@ declare -r  YCSH_PATH_INSTALL=$YCSH_PATH_INSTALL YCSH_PATH_LIB=$YCSH_PATH_LIB
 declare -r -i RTN_SUCC=$YCSH_SUCC EXIT_SUCC=$YCSH_SUCC RTN_FAIL=$YCSH_FAIL EXIT_FAIL=$YCSH_FAIL RTN_ERR=$YCSH_FAIL EXIT_ERR=$YCSH_FAIL
 declare -r -i STDIN=$YCSH_STDIN STDOUT=$YCSH_STDOUT STDERR=$YCSH_STDERR STDDEBUG=$YCSH_STDDEBUG
 
-# support include files
-lib_config_source()
-{
-	local arg
-
-	for arg in "$@"
-	do
-		if [ -f "$arg" -a -r "$arg" ] && . "$YCSH_PATH_LIB/$arg"; then
-			:
-		else
-			# failed.
-			echo "include failed: '$YCSH_PATH_LIB/$arg' <info: $(caller 0)>" >& $STDERR
-			exit $EXIT_FAIL
-		fi
-	done
-}
-
 declare -i EBASE=$YCSH_EBASE
-lib_config_evalue()
+__yc_config_err_value()
 {
 	EBASE=$((EBASE+1))
 	echo $EBASE
 }
 
-declare -r -i EPARAM=$(lib_config_evalue) EINVAL=$(lib_config_evalue)
+declare -r -i\
+	EPARAM=$(__yc_config_err_value)\
+	EINVAL=$(__yc_config_err_value)
+
+# support include files
+yc_source()
+{
+	local arg
+
+	for arg in "$@"
+	do
+		arg="$YCSH_PATH_LIB/$arg"
+		if [ -f "$arg" -a -r "$arg" ] && . "$arg"; then
+			:
+		else
+			# failed.
+			echo \$?=$?
+			echo "include failed: '$arg' (file: $(caller 0))" >& $STDERR
+			exit $EXIT_FAIL
+		fi
+	done
+}

@@ -13,8 +13,6 @@
 #
 # Export Symbols
 #	Index	Name				Type		Description
-#	1		__io_warn			String		Open warning output or not, yes|no, default yes
-#	2		__io_debug			Integer		Debug level	0-9, default 3, 9 always output to stderr
 #	3		YCSH_IO_WARN		String		Default io-warn, yes|no
 #	4		YCSH_IO_DEBUG		Integer		Default io-debug, 0-9
 #	5		yc_io_ctrl			Function	Set/Reset io-warn/io-debug
@@ -38,7 +36,7 @@ _65c7ccaa356a67a39957e9b996cb41e8=65c7ccaa356a67a39957e9b996cb41e8
 : ${YCSH_IO_WARN:=yes}
 : ${YCSH_IO_DEBUG:=3}
 
-declare __io_warn=$YCSH_IO_WARN __io_debug=$YCSH_IO_DEBUG io_prefix=""
+declare io_prefix=""
 
 yc_io_ctrl()
 {
@@ -50,11 +48,11 @@ yc_io_ctrl()
 
 		case "${arg%%=*}" in
 			"io_warn" | "warn")
-				__io_warn=${arg##*=}
+				YCSH_IO_WARN=${arg##*=}
 				;;
 			"io_debug" | "debug")
-				__io_debug=${arg##*=}
-				[ -z "${__io_debug##*[!0-9]*}" ] && __io_debug=$YCSH_IO_DEBUG
+				arg=${arg##*=}
+				[ -n "${arg##*[!0-9]*}" ] && YCSH_IO_DEBUG=$arg
 				;;
 			*)
 				;;
@@ -75,7 +73,7 @@ yc_print()
 
 yc_warn()
 {
-	[ "yes" = "$__io_warn" ] && echo "$@" >& $STDERR
+	[ "yes" = "$YCSH_IO_WARN" ] && echo "$@" >& $STDERR
 }
 
 yc_debug()
@@ -86,7 +84,7 @@ yc_debug()
 		dl=$1; shift
 	fi
 
-	[ "$dl" -ge "$__io_debug" ] && echo "<$dl> $(caller 0): $@" >& $STDERR
+	[ "$dl" -ge "$YCSH_IO_DEBUG" ] && echo "<$dl> $(caller 0): $@" >& $STDERR
 }
 
 yc_exit()
@@ -98,9 +96,9 @@ yc_exit()
 	# print other arguments out
 	if [ "$#" -gt "0" ]; then
 		if [ "$status" -eq "0" ]; then
-			libwis_print "$@"	# status iz 0, then print to STDOUT
+			yc_print "$@"	# status iz 0, then print to STDOUT
 		else
-			libwis_warn "$@"	# print to STDERR
+			yc_warn "$@"	# print to STDERR
 		fi
 	fi
 
