@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. $YCSH_PATH_INSTALL/lib/lib_getopt.sh
+
+eval $(yc_getopt "pre" "true" "list,l" "man,m" "pwd,p" -- "$@")
+
+if yc_var_isdeclared pre_list; then
+	ls -l
+fi
+
+if yc_var_isdeclared pre_man; then
+	man ls
+fi
+
+if yc_var_isdeclared pre_pwd; then
+	pwd
+fi
