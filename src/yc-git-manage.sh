@@ -24,34 +24,67 @@ declare -r self=$(basename $0)
 
 usage()
 {
-	local -i exit=0
-
-	[ $# -ne 0 ] && exit=$1
-
 	yc_echo -e "\nUsage:"
-	yc_echo -e " $self [Options]\t\tmanage git-repositories"
+	yc_echo -e "  $self [Options]        manage git-repositories"
 	yc_echo -e "\nOptions"
-	yc_echo -e " -h, --help\t\t\t\tprint help"
+	yc_echo -e "  -h, --help             print help"
+	yc_echo -e "  -p, --push=repo.git    push repository"
+	yc_echo -e "  -g, --pull=repo.git    pull repository"
+	yc_echo -e "  -u, --user=user        execution user"
+	yc_echo -e "  -h, --host=hostname    hostname of git"
+	yc_echo -e "  -b, --base=base-dir    base directory of repositories"
 	yc_echo -e "\n"
 
-	exit $exit
+	yc_exit $1
+}
+
+remote_do()
+{
+	echo -n " ... "
+	local val
+	val=$(ssh $git_user_args@$git_host_args $@ 2>&1)
+	if [ $? -eq 0 ]; then
+		echo "ok"
+	else
+		echo "failed <err: $val>"
+	fi
 }
 
 push()
 {
-	:
+	local repo
+	for repo in $git_push_args
+	do
+		[ -n "${repo%%*.git}" ] && continue
+		echo -n "push $git_base_args/$repo"
+		remote_do "cd $git_base_args/$repo && git push"
+	done
+
 	exit 0
 }
 
 pull()
 {
-	:
+	local repo
+	for repo in $git_pull_args
+	do
+		[ -n "${repo%%*.git}" ] && continue
+		echo -n "pull $git_base_args/$repo"
+		remote_do "cd $git_base_args/$repo && git remote update"
+	done
+
 	exit 0
 }
 
 [ $# -ne 0 ] || usage
 
-declare $(yc_getopt "git,args" "true" "help,h,::" "push,s,::" "pull,l,::" -- "$@")
+val=$(yc_getopt "git,args" "true" "help,h,::" "push,p,:" "pull,g,:" "user,u,::" "host,h,::" "base,b,::" -- "$@")
+
+[ -n "$val" ] && eval declare "$val"
+
+: ${git_user_args:=git}
+: ${git_host_args:=t410.ssh}
+: ${git_base_args:=repositories}
 
 yc_var_isdeclared git_help_args && usage
 
